@@ -2,13 +2,33 @@
 <html lang="zh-Hant">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>毛孩接送記帳</title>
+<title>毛孩接送管理系統</title>
 <style>
-*{box-sizing:border-box}body{margin:0;background:#f5f2ea;color:#203a31;font:16px system-ui,sans-serif}main{max-width:680px;margin:auto;padding:24px 16px 48px}h1{margin:0;font-size:2rem}h2{margin:0 0 16px;font-size:1.25rem}p{line-height:1.55}header p,small{color:#455c52}section{background:#fff;border:1px solid #ddd9ce;border-radius:18px;padding:18px;margin-top:16px}.grid,.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.stats{grid-template-columns:repeat(3,minmax(0,1fr));margin:16px 0}.stats div{background:#eaf2ec;border-radius:12px;padding:10px;overflow-wrap:anywhere}.stats strong{display:block;margin-top:5px}label{display:block;font-weight:600}input,select,textarea,button{font:inherit;color:inherit}input,select,textarea{display:block;width:100%;min-width:0;min-height:44px;margin:5px 0 12px;padding:8px;border:1px solid #81958a;border-radius:8px;background:#fff}textarea{resize:vertical}button{min-height:44px;padding:8px 13px;border:1px solid #81958a;border-radius:9px;background:#fff;cursor:pointer}.primary{background:#244f40;color:#fff;border-color:#244f40}.actions{display:flex;gap:8px;flex-wrap:wrap}article{border-top:1px solid #ddd9ce;padding:14px 0}article p{margin:6px 0 10px;white-space:pre-wrap;overflow-wrap:anywhere}#status{min-height:1.5em}small{display:block} [hidden]{display:none!important}
+*{box-sizing:border-box}body{margin:0;background:#f5f2ea;color:#203a31;font:16px system-ui,sans-serif}main{max-width:680px;margin:auto;padding:24px 16px 48px}h1{margin:0;font-size:2rem}h2{margin:0 0 16px;font-size:1.25rem}p{line-height:1.55}header p,small{color:#455c52}section{background:#fff;border:1px solid #ddd9ce;border-radius:18px;padding:18px;margin-top:16px}.grid,.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.stats{grid-template-columns:repeat(2,minmax(0,1fr));margin:16px 0}.stats div{background:#eaf2ec;border-radius:12px;padding:10px;overflow-wrap:anywhere}.stats strong{display:block;margin-top:5px}label{display:block;font-weight:600}input,select,textarea,button{font:inherit;color:inherit}input,select,textarea{display:block;width:100%;min-width:0;min-height:44px;margin:5px 0 12px;padding:8px;border:1px solid #81958a;border-radius:8px;background:#fff}textarea{resize:vertical}button{min-height:44px;padding:8px 13px;border:1px solid #81958a;border-radius:9px;background:#fff;cursor:pointer}.primary{background:#244f40;color:#fff;border-color:#244f40}.actions{display:flex;gap:8px;flex-wrap:wrap}article{border-top:1px solid #ddd9ce;padding:14px 0}article p{margin:6px 0 10px;white-space:pre-wrap;overflow-wrap:anywhere}#status{min-height:1.5em}small{display:block} [hidden]{display:none!important}
+
+header{padding:20px 0}h1{font-size:clamp(1.6rem,6vw,2.5rem)}input[type=checkbox]{appearance:none;display:inline-block;vertical-align:middle;width:24px;min-height:24px;margin:0 7px 0 0;border-radius:50%;padding:0}input[type=checkbox]:checked{background:#244f40;box-shadow:inset 0 0 0 4px white}input[role=switch]{width:42px;border-radius:18px;background:radial-gradient(circle at 11px,#244f40 6px,transparent 7px)}input[role=switch]:checked{background:radial-gradient(circle at 30px,white 6px,transparent 7px),#244f40;box-shadow:none}.ride{padding:10px 0}.car{font-size:.9rem;margin:10px 0;color:#455c52}button:disabled{opacity:.55;cursor:wait}a{color:#244f40}
+#bookings article>.grid{display:flex;gap:24px;flex-wrap:wrap}#bookings .car{display:flex;justify-content:space-between;align-items:center;gap:12px;background:#eaf2ec;border-radius:12px;padding:10px 12px;margin:4px 0;color:#203a31;min-height:54px}#bookings .car input{flex:none;margin:0}#bookings .car input:disabled{opacity:.5}#bookings .car small{font-weight:400;margin-top:2px}
+.page-nav{display:flex;gap:8px;margin-top:16px}.page-nav button{flex:1}.page-nav button[aria-pressed=true]{background:#244f40;color:#fff;border-color:#244f40}.page-footer{margin-top:16px}
 </style>
 <main>
-<header><h1>毛孩接送記帳</h1><p>紀錄只存在這台裝置的目前瀏覽器，不會跨裝置同步。換手機或清除瀏覽器資料前，請先匯出 JSON 備份。</p></header>
-<section><h2 id="formTitle">新增接送</h2>
+<header><h1>毛孩接送管理系統</h1></header>
+<p id="message" role="status" aria-live="polite">正在連線…</p>
+<section id="loginPanel" hidden><h2>登入</h2><form id="login">
+<label>電子郵件<input id="email" type="email" autocomplete="username" required></label>
+<label>密碼<input id="password" type="password" autocomplete="current-password" required></label>
+<button class="primary">登入</button></form></section>
+<div id="workspace" hidden>
+<div class="actions"><strong id="role"></strong><button id="logout">登出</button></div>
+<nav class="page-nav" aria-label="系統分頁">
+<button type="button" id="scheduleNav" aria-controls="schedulePage" aria-pressed="true">排班</button>
+<button type="button" id="ledgerNav" aria-controls="ledgerPage" aria-pressed="false">接送記帳</button>
+</nav>
+<div id="schedulePage">
+<section><h2 id="bookingTitle">接送預約</h2><div id="bookings"></div><button id="saveWeek" class="primary" hidden>儲存下週需求</button></section>
+<button type="button" class="page-footer" id="nextPage">下一頁 · 接送記帳</button>
+</div>
+<div id="ledgerPage" hidden>
+<section id="recordEditor" hidden><h2 id="formTitle">新增接送</h2>
 <form id="entry">
 <div class="grid">
 <label>日期<input id="date" type="date" required></label>
@@ -17,255 +37,16 @@
 <label>每趟費用（NT$）<input id="fee" type="number" min="0" step="1" required></label>
 </div>
 <small>早上、晚上每趟 NT$250，白天可自訂費用。</small>
-<label>狗狗數量<input id="dogs" type="number" min="1" step="1" value="1" required></label>
 <label>備註<textarea id="note" rows="2"></textarea></label>
 <div class="actions"><button class="primary" id="save">新增紀錄</button><button type="button" id="cancel" hidden>取消編輯</button></div>
 </form></section>
 <section><h2>月結與接送紀錄</h2><label>月份<input id="month" type="month" required></label>
-<div class="stats" style="grid-template-columns:repeat(2,minmax(0,1fr))"><div>趟數<strong id="trips"></strong></div><div>收入<strong id="income"></strong></div></div>
+<div class="stats" ><div>趟數<strong id="trips"></strong></div><div>應付金額<strong id="income"></strong></div></div>
 <div id="records"></div>
 </section>
-<section><h2>匯出與備份</h2><div class="actions"><button id="csv">匯出當月 CSV</button><button id="backup">匯出全部 JSON</button><button id="restore">匯入 JSON</button></div><input id="file" type="file" accept=".json,application/json" hidden><p id="status" role="status"></p></section>
-</main>
-<script>
-'use strict';
-const byId = id => document.getElementById(id);
-const key = 'pet-shuttle.records.v1';
-const form = byId('entry');
-const date = byId('date');
-const time = byId('time');
-const period = byId('period');
-const fee = byId('fee');
-const dogs = byId('dogs');
-const note = byId('note');
-const month = byId('month');
-const file = byId('file');
-const notify = message => { byId('status').textContent = message; };
-const money = value => 'NT$' + value.toLocaleString('zh-TW');
-const now = new Date();
-const today = [now.getFullYear(), now.getMonth() + 1, now.getDate()]
-  .map(value => String(value).padStart(2, '0')).join('-');
-let records = [];
-let editing = null;
-let storageReadable = true;
-
-function normalizeTime(value) {
-  const formatted = /^\d{4}$/.test(value) ? value.slice(0, 2) + ':' + value.slice(2) : value;
-  return /^(?:[01]\d|2[0-3]):[0-5]\d$/.test(formatted) ? formatted : '';
-}
-
-function validateRecords(value) {
-  if (!Array.isArray(value)) throw new Error('找不到有效的紀錄清單。');
-  const ids = new Set();
-  return value.map(row => {
-    if (!row || typeof row !== 'object') throw new Error('備份含有無效紀錄。');
-    const { id, date, time, period, fee, dogs, note } = row;
-    const parsed = new Date(date);
-    const normalized = normalizeTime(time);
-    if (typeof id !== 'string' || !id || ids.has(id) ||
-        !/^\d{4}-\d{2}-\d{2}$/.test(date) || !Number.isFinite(+parsed) ||
-        parsed.toISOString().slice(0, 10) !== date || !normalized ||
-        !['早上', '白天', '晚上'].includes(period) ||
-        !Number.isSafeInteger(fee) || fee < 0 || (period !== '白天' && fee !== 250) ||
-        !Number.isSafeInteger(dogs) || dogs < 1 || typeof note !== 'string') {
-      throw new Error('備份含有無效或重複的紀錄。');
-    }
-    ids.add(id);
-    return { id, date, time: normalized, period, fee, dogs, note };
-  });
-}
-
-function load() {
-  return validateRecords(JSON.parse(localStorage.getItem(key) ?? '[]'));
-}
-try {
-  records = load();
-} catch {
-  storageReadable = false;
-  notify('無法讀取這個瀏覽器的紀錄。請檢查瀏覽器儲存設定，或從 JSON 備份復原。');
-}
-
-function commit(next) {
-  try {
-    localStorage.setItem(key, JSON.stringify(next));
-  } catch {
-    alert('儲存失敗，請檢查瀏覽器的儲存空間與設定。');
-    return false;
-  }
-  storageReadable = true;
-  records = next;
-  return true;
-}
-
-function syncFee() {
-  fee.readOnly = period.value !== '白天';
-  fee.value = fee.readOnly ? '250' : '';
-}
-function resetEntry() {
-  editing = null;
-  form.reset();
-  date.value = today;
-  time.setCustomValidity('');
-  syncFee();
-  byId('formTitle').textContent = '新增接送';
-  byId('save').textContent = '新增紀錄';
-  byId('cancel').hidden = true;
-}
-function selectedRecords() {
-  return records.filter(row => row.date.slice(0, 7) === month.value)
-    .sort((a, b) => (b.date + b.time).localeCompare(a.date + a.time));
-}
-function action(label, handler) {
-  const button = document.createElement('button');
-  button.type = 'button';
-  button.textContent = label;
-  button.onclick = handler;
-  return button;
-}
-function render() {
-  const rows = selectedRecords();
-  byId('trips').textContent = rows.length;
-  
-  byId('income').textContent = money(rows.reduce((sum, row) => sum + row.fee, 0));
-  const list = byId('records');
-  list.replaceChildren();
-  if (!rows.length) {
-    list.textContent = '這個月還沒有接送紀錄。';
-    return;
-  }
-  for (const row of rows) {
-    const article = document.createElement('article');
-    const title = document.createElement('strong');
-    title.textContent = [row.date, row.time, row.period].join(' · ');
-    const details = document.createElement('p');
-    details.textContent = row.dogs + ' 隻 · ' + money(row.fee) + (row.note ? '\n' + row.note : '');
-    const actions = document.createElement('div');
-    actions.className = 'actions';
-    actions.append(action('編輯', () => edit(row)), action('刪除', () => {
-      if (!confirm('刪除 ' + row.date + ' ' + row.time + ' 的接送紀錄？')) return;
-      if (commit(records.filter(item => item.id !== row.id))) {
-        if (editing === row.id) resetEntry();
-        render();
-      }
-    }));
-    article.append(title, details, actions);
-    list.append(article);
-  }
-}
-function edit(row) {
-  editing = row.id;
-  date.value = row.date;
-  time.value = row.time;
-  time.setCustomValidity('');
-  period.value = row.period;
-  syncFee();
-  fee.value = row.fee;
-  dogs.value = row.dogs;
-  note.value = row.note;
-  byId('formTitle').textContent = '編輯接送';
-  byId('save').textContent = '儲存修改';
-  byId('cancel').hidden = false;
-  date.focus();
-}
-function formatTime() {
-  const normalized = normalizeTime(time.value.trim());
-  if (normalized) time.value = normalized;
-  return normalized;
-}
-time.oninput = () => {
-  time.setCustomValidity('');
-  if (time.value.length === 4) formatTime();
-};
-time.onblur = formatTime;
-period.onchange = syncFee;
-byId('cancel').onclick = resetEntry;
-month.onchange = render;
-form.onsubmit = event => {
-  event.preventDefault();
-  if (!storageReadable) {
-    alert('目前無法讀取原有紀錄，請先檢查儲存設定或匯入備份。');
-    return;
-  }
-  const normalized = formatTime();
-  if (!normalized) {
-    time.setCustomValidity('請輸入有效的 24 小時制時間，例如 2100 或 21:00。');
-    time.reportValidity();
-    return;
-  }
-  if (!Number.isSafeInteger(fee.valueAsNumber) || !Number.isSafeInteger(dogs.valueAsNumber)) {
-    alert('費用與狗狗數量請輸入有效整數。');
-    return;
-  }
-  const row = { id: editing ?? (crypto.randomUUID?.() ?? Date.now() + '-' + Math.random().toString(36).slice(2)), date: date.value, time: normalized,
-    period: period.value, fee: fee.valueAsNumber, dogs: dogs.valueAsNumber, note: note.value };
-  const next = editing ? records.map(item => item.id === editing ? row : item) : [...records, row];
-  if (commit(next)) {
-    month.value = row.date.slice(0, 7);
-    resetEntry();
-    render();
-  }
-};
-window.addEventListener('storage', event => {
-  if (event.key !== key && event.key !== null) return;
-  try {
-    records = load();
-    storageReadable = true;
-    if (editing) resetEntry();
-    render();
-  } catch {
-    storageReadable = false;
-    notify('無法讀取更新後的瀏覽器紀錄。');
-  }
-});
-function download(name, type, content) {
-  const url = URL.createObjectURL(new Blob([content], { type }));
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = name;
-  document.body.append(link);
-  link.click();
-  link.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
-}
-function csvCell(value) {
-  let text = String(value);
-  if (/^\s*[=+\-@]|^[\t\r\n]/.test(text)) text = "'" + text;
-  return '"' + text.replaceAll('"', '""') + '"';
-}
-byId('csv').onclick = () => {
-  if (!storageReadable || !month.value) return notify('請確認紀錄可讀取並選擇月份。');
-  const rows = [['日期', '時間', '時段', '費用（NT$）', '狗狗數量', '備註'],
-    ...selectedRecords().map(row => [row.date, row.time, row.period, row.fee, row.dogs, row.note])];
-  download('接送紀錄-' + month.value + '.csv', 'text/csv;charset=utf-8',
-    '\uFEFF' + rows.map(row => row.map(csvCell).join(',')).join('\r\n'));
-};
-byId('backup').onclick = () => {
-  if (!storageReadable) return notify('無法讀取目前的紀錄。');
-  download('毛孩接送備份-' + today + '.json', 'application/json',
-    JSON.stringify({ version: 1, records }, null, 2));
-};
-byId('restore').onclick = () => file.click();
-file.onchange = async () => {
-  const selected = file.files[0];
-  file.value = '';
-  if (!selected) return;
-  try {
-    const backup = JSON.parse(await selected.text());
-    if (backup?.version !== 1) throw new Error('此檔案不是支援的毛孩接送備份。');
-    const next = validateRecords(backup.records);
-    if (!confirm('匯入 ' + next.length + ' 筆紀錄並取代目前此瀏覽器的全部紀錄？')) return;
-    if (commit(next)) {
-      resetEntry();
-      month.value = next.map(row => row.date).sort().at(-1)?.slice(0, 7) ?? today.slice(0, 7);
-      render();
-      notify('已匯入 ' + next.length + ' 筆紀錄。');
-    }
-  } catch (error) {
-    notify('匯入失敗。' + error.message);
-  }
-};
-resetEntry();
-month.value = today.slice(0, 7);
-render();
-</script>
+<section><h2>匯出與備份</h2><div class="actions"><button id="csv">匯出當月 CSV</button><button id="backup">匯出全部 JSON</button><button id="restore" hidden>匯入 JSON</button><button id="localBackup" hidden>下載此裝置的舊版備份</button></div><input id="file" type="file" accept=".json,application/json" hidden></section>
+<button type="button" class="page-footer" id="previousPage">上一頁 · 排班</button>
+</div>
+</div></main>
+<script type="module" src="./app.mjs"></script>
 </html>
