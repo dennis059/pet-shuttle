@@ -22,7 +22,7 @@
 <div class="actions"><button class="primary" id="save">新增紀錄</button><button type="button" id="cancel" hidden>取消編輯</button></div>
 </form></section>
 <section><h2>月結與接送紀錄</h2><label>月份<input id="month" type="month" required></label>
-<div class="stats"><div>趟數<strong id="trips"></strong></div><div>狗狗數<strong id="totalDogs"></strong></div><div>收入<strong id="income"></strong></div></div>
+<div class="stats" style="grid-template-columns:repeat(2,minmax(0,1fr))"><div>趟數<strong id="trips"></strong></div><div>收入<strong id="income"></strong></div></div>
 <div id="records"></div>
 </section>
 <section><h2>匯出與備份</h2><div class="actions"><button id="csv">匯出當月 CSV</button><button id="backup">匯出全部 JSON</button><button id="restore">匯入 JSON</button></div><input id="file" type="file" accept=".json,application/json" hidden><p id="status" role="status"></p></section>
@@ -125,7 +125,7 @@ function action(label, handler) {
 function render() {
   const rows = selectedRecords();
   byId('trips').textContent = rows.length;
-  byId('totalDogs').textContent = rows.reduce((sum, row) => sum + row.dogs, 0);
+  
   byId('income').textContent = money(rows.reduce((sum, row) => sum + row.fee, 0));
   const list = byId('records');
   list.replaceChildren();
