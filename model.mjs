@@ -22,11 +22,11 @@ export function validate(row) {
       parsed.toISOString().slice(0, 10) !== date ||
       !/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(time) || !periods.includes(period) ||
       !Number.isSafeInteger(fee) || fee < 0 || (period !== '白天' && fee !== 250) ||
-      !Number.isSafeInteger(dogs) || dogs < 1 || typeof note !== 'string' ||
+      (dogs !== undefined && (!Number.isSafeInteger(dogs) || dogs < 1)) || typeof note !== 'string' ||
       new TextEncoder().encode(note).length > 500000) {
     throw new Error('備份或表單含有無效的紀錄。請檢查日期、時間、金額、狗狗數及備註。');
   }
-  return { id, date, time, period, fee, dogs, note };
+  return { id, date, time, period, fee, ...(dogs === undefined ? {} : { dogs }), note };
 }
 
 export function readBackup(text) {
@@ -54,7 +54,7 @@ export function sameRecord(a, b) {
 
 export function totals(rows) {
   return rows.reduce((sum, row) => ({
-    trips: sum.trips + 1, dogs: sum.dogs + row.dogs, fee: sum.fee + row.fee
+    trips: sum.trips + 1, dogs: sum.dogs + (row.dogs ?? 0), fee: sum.fee + row.fee
   }), { trips: 0, dogs: 0, fee: 0 });
 }
 

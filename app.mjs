@@ -175,7 +175,7 @@ function resetEntry() {
 
 function edit(row) {
   editing = row;
-  for (const key of ['date', 'time', 'period', 'dogs', 'note']) $(key).value = row[key];
+  for (const key of ['date', 'time', 'period', 'note']) $(key).value = row[key];
   syncFee();
   $('fee').value = row.fee;
   $('formTitle').textContent = '編輯接送';
@@ -202,14 +202,13 @@ function renderRecords() {
   const rows = selectedRecords();
   const summary = totals(rows);
   $('trips').textContent = recordsReady ? summary.trips : '—';
-  $('dogTotal').textContent = recordsReady ? summary.dogs : '—';
   $('income').textContent = recordsReady ? money(summary.fee) : '—';
   $('csv').disabled = $('backup').disabled = !recordsReady;
   if (!rows.length) list.textContent = recordsReady ? '這個月還沒有接送紀錄。' : '正在載入紀錄…';
   for (const row of rows) {
     const article = element('article');
     article.append(element('strong', [row.date, row.time, row.period].join(' · ')),
-      element('p', row.dogs + ' 隻 · ' + money(row.fee) + (row.note ? '\n' + row.note : '')));
+      element('p', money(row.fee) + (row.note ? '\n' + row.note : '')));
     if (role === 'driver') {
       const actions = element('div', '', 'actions');
       actions.append(button('編輯', () => edit(row)), button('刪除', async () => {
@@ -240,7 +239,7 @@ function jsonBackup(rows) {
 async function importRecords(rows) {
   const summary = totals(rows);
   if (!rows.length) return notify('備份沒有接送紀錄。');
-  if (!confirm(`核對備份：${summary.trips} 筆、${summary.dogs} 隻、${money(summary.fee)}。是否匯入？`)) return;
+  if (!confirm(`核對備份：${summary.trips} 筆、${money(summary.fee)}。是否匯入？`)) return;
   if (rows.length > 500) throw new Error('單次請匯入最多 500 筆，以便整批核對。');
   const added = await api.runTransaction(db, async tx => {
     const refs = rows.map(row => recordRef(row.id));
@@ -258,7 +257,7 @@ async function importRecords(rows) {
   });
   $('month').value = rows.map(row => row.date).sort().at(-1).slice(0, 7);
   renderRecords();
-  notify(`已核對 ${summary.trips} 筆、${summary.dogs} 隻、${money(summary.fee)}。新增 ${added} 筆，略過 ${rows.length - added} 筆相同紀錄。`);
+  notify(`已核對 ${summary.trips} 筆、${money(summary.fee)}。新增 ${added} 筆，略過 ${rows.length - added} 筆相同紀錄。`);
 }
 
 $('entry').onsubmit = event => {
@@ -267,7 +266,7 @@ $('entry').onsubmit = event => {
     const row = validate({
       id: editing?.id ?? crypto.randomUUID(), date: $('date').value,
       time: $('time').value, period: $('period').value, fee: $('fee').valueAsNumber,
-      dogs: $('dogs').valueAsNumber, note: $('note').value
+      ...(editing?.dogs === undefined ? {} : { dogs: editing.dogs }), note: $('note').value
     });
     await changeRecord(editing, row);
     $('month').value = row.date.slice(0, 7);
@@ -280,8 +279,8 @@ $('period').onchange = syncFee;
 $('cancel').onclick = resetEntry;
 $('month').onchange = renderRecords;
 $('csv').onclick = () => {
-  const rows = [['日期', '時間', '時段', '費用（NT$）', '狗狗數量', '備註'],
-    ...selectedRecords().map(row => [row.date, row.time, row.period, row.fee, row.dogs, row.note])];
+  const rows = [['日期', '時間', '時段', '費用（NT$）', '備註'],
+    ...selectedRecords().map(row => [row.date, row.time, row.period, row.fee, row.note])];
   download('接送紀錄-' + $('month').value + '.csv', 'text/csv;charset=utf-8',
     '\uFEFF' + rows.map(row => row.map(csvCell).join(',')).join('\r\n'));
 };
@@ -298,7 +297,7 @@ $('localBackup').onclick = () => perform($('localBackup'), () => {
   download('毛孩接送舊版原始備份-' + today() + '.json', 'application/json',
     '{"version":1,"records":' + value + '}');
   const summary = totals(deduplicate(JSON.parse(value)));
-  notify(`舊版備份已下載。共 ${summary.trips} 筆、${summary.dogs} 隻、${money(summary.fee)}。`);
+  notify(`舊版備份已下載。共 ${summary.trips} 筆、${money(summary.fee)}。`);
 });
 
 async function connect(user) {

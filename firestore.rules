@@ -39,7 +39,7 @@ service cloud.firestore {
           row.time is string && row.time.matches('^([01][0-9]|2[0-3]):[0-5][0-9]$') &&
           row.period in ['早上', '白天', '晚上'] &&
           row.fee is int && row.fee >= 0 && (row.period == '白天' || row.fee == 250) &&
-          row.dogs is int && row.dogs > 0 && row.note is string && row.note.size() <= 500000;
+          (!('dogs' in row) || (row.dogs is int && row.dogs > 0)) && row.note is string && row.note.size() <= 500000;
       }
       allow read: if member();
       allow create, update: if role('driver') && valid();
