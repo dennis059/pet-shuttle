@@ -1,0 +1,49 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function role(value) {
+      return request.auth != null &&
+        get(/databases/$(database)/documents/petShuttleRoles/$(request.auth.uid)).data.role == value;
+    }
+    function member() {
+      return role('driver') || role('customer');
+    }
+    match /petShuttleRoles/{uid} {
+      allow get: if request.auth != null && request.auth.uid == uid;
+    }
+    match /petShuttleBookings/{id} {
+      function valid() {
+        let row = request.resource.data;
+        return row.keys().hasOnly(['date', 'slot', 'car', 'status', 'revision']) &&
+          row.date is string && row.date.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$') &&
+          row.slot in ['am', 'pm'] && id == row.date + '_' + row.slot &&
+          row.car is bool && row.revision is int;
+      }
+      allow read: if member();
+      allow create: if role('customer') && valid() &&
+        request.resource.data.status == 'pending' && request.resource.data.revision == 1;
+      allow update: if valid() && request.resource.data.revision == resource.data.revision + 1 &&
+        ((role('customer') && request.resource.data.status in ['pending', 'cancelled'] &&
+          (request.resource.data.car != resource.data.car ||
+           resource.data.status == 'cancelled' || request.resource.data.status == 'cancelled')) ||
+         (role('driver') && resource.data.status == 'pending' &&
+          request.resource.data.status in ['accepted', 'rejected'] &&
+          request.resource.data.car == resource.data.car));
+    }
+    match /petShuttleRecords/{id} {
+      function valid() {
+        let row = request.resource.data;
+        return row.keys().hasOnly(['id', 'date', 'time', 'period', 'fee', 'dogs', 'note']) &&
+          row.id == id &&
+          row.date is string && row.date.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$') &&
+          row.time is string && row.time.matches('^([01][0-9]|2[0-3]):[0-5][0-9]$') &&
+          row.period in ['早上', '白天', '晚上'] &&
+          row.fee is int && row.fee >= 0 && (row.period == '白天' || row.fee == 250) &&
+          row.dogs is int && row.dogs > 0 && row.note is string && row.note.size() <= 500000;
+      }
+      allow read: if member();
+      allow create, update: if role('driver') && valid();
+      allow delete: if role('driver');
+    }
+  }
+}
