@@ -21,7 +21,7 @@ export function validate(row) {
       !/^\d{4}-\d{2}-\d{2}$/.test(date) || !Number.isFinite(+parsed) ||
       parsed.toISOString().slice(0, 10) !== date ||
       !/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(time) || !periods.includes(period) ||
-      !Number.isSafeInteger(fee) || fee < 0 || (period !== '白天' && fee !== 250) ||
+      !Number.isSafeInteger(fee) || fee < 0 ||
       (dogs !== undefined && (!Number.isSafeInteger(dogs) || dogs < 1)) || typeof note !== 'string' ||
       new TextEncoder().encode(note).length > 500000) {
     throw new Error('備份或表單含有無效的紀錄。請檢查日期、時間、金額、狗狗數及備註。');

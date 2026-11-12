@@ -36,7 +36,7 @@ header{padding:20px 0}h1{font-size:clamp(1.6rem,6vw,2.5rem)}input[type=checkbox]
 <label>時段<select id="period"><option value="早上">早上</option><option value="白天">白天</option><option value="晚上">晚上</option></select></label>
 <label>每趟費用（NT$）<input id="fee" type="number" min="0" step="1" required></label>
 </div>
-<small>早上、晚上每趟 NT$250，白天可自訂費用。</small>
+<small>早上、晚上預設每趟 NT$250，可依實際費用調整。</small>
 <label>備註<textarea id="note" rows="2"></textarea></label>
 <div class="actions"><button class="primary" id="save">新增紀錄</button><button type="button" id="cancel" hidden>取消編輯</button></div>
 </form></section>
@@ -48,5 +48,5 @@ header{padding:20px 0}h1{font-size:clamp(1.6rem,6vw,2.5rem)}input[type=checkbox]
 <button type="button" class="page-footer" id="previousPage">上一頁 · 排班</button>
 </div>
 </div></main>
-<script type="module" src="./app.mjs"></script>
+<script type="module" src="./app.mjs?v=20261112-fee"></script>
 </html>

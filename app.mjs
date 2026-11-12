@@ -1,4 +1,4 @@
-import { today, nextWeek, slots, legacyKey, validate, readBackup, deduplicate, sameRecord, totals, csvCell } from './model.mjs';
+import { today, nextWeek, slots, legacyKey, validate, readBackup, deduplicate, sameRecord, totals, csvCell } from './model.mjs?v=20261112-fee';
 
 const $ = id => document.getElementById(id);
 const notify = message => { $('message').textContent = message; };
@@ -184,8 +184,7 @@ function selectedRecords() {
 }
 
 function syncFee() {
-  $('fee').readOnly = $('period').value !== '白天';
-  $('fee').value = $('fee').readOnly ? 250 : '';
+  $('fee').value = $('period').value === '白天' ? '' : 250;
 }
 
 function resetEntry() {
