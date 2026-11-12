@@ -6,6 +6,7 @@ const money = value => 'NT$' + value.toLocaleString('zh-TW');
 const slotLabel = { am: '早上', pm: '晚上' };
 const statusLabel = { pending: '待司機確認', accepted: '已確認', rejected: '無法配合' };
 const dayLabel = new Intl.DateTimeFormat('zh-TW', { weekday: 'short', month: 'numeric', day: 'numeric', timeZone: 'UTC' });
+const weekdayLabel = new Intl.DateTimeFormat('zh-TW', { weekday: 'short', timeZone: 'UTC' });
 let auth, db, api, role, editing;
 let bookings = new Map();
 let records = [];
@@ -231,7 +232,8 @@ function renderRecords() {
   if (!rows.length) list.textContent = recordsReady ? '這個月還沒有接送紀錄。' : '正在載入紀錄…';
   for (const row of rows) {
     const article = element('article');
-    article.append(element('strong', [row.date, row.time, row.period].join(' · ')),
+    const weekday = weekdayLabel.format(new Date(row.date + 'T00:00:00Z'));
+    article.append(element('strong', [row.date + '（' + weekday + '）', row.time, row.period].join(' · ')),
       element('p', money(row.fee) + (row.note ? '\n' + row.note : '')));
     if (role === 'driver') {
       const actions = element('div', '', 'actions');
