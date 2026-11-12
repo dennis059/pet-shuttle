@@ -4,7 +4,7 @@ const $ = id => document.getElementById(id);
 const notify = message => { $('message').textContent = message; };
 const money = value => 'NT$' + value.toLocaleString('zh-TW');
 const slotLabel = { am: '早上', pm: '晚上' };
-const statusLabel = { pending: '待司機確認', accepted: '已確認', rejected: '已拒絕' };
+const statusLabel = { pending: '待司機確認', accepted: '已確認', rejected: '無法配合' };
 const dayLabel = new Intl.DateTimeFormat('zh-TW', { weekday: 'short', month: 'numeric', day: 'numeric', timeZone: 'UTC' });
 let auth, db, api, role, editing;
 let bookings = new Map();
@@ -83,7 +83,7 @@ function renderBookings() {
         element('p', (row.car ? '須開車' : '機車') + ' · ' + statusLabel[row.status]));
       if (row.status === 'pending') {
         const actions = element('div', '', 'actions');
-        for (const [status, label] of [['accepted', '確認'], ['rejected', '拒絕']]) {
+        for (const [status, label] of [['accepted', '確認'], ['rejected', '無法配合']]) {
           actions.append(button(label, async () => {
             await api.runTransaction(db, async tx => {
               const ref = bookingRef(id);
@@ -91,7 +91,7 @@ function renderBookings() {
               if (revision(current) !== row.revision) throw new Error('需求已變更，請重新查看。');
               tx.update(ref, { status, revision: row.revision + 1 });
             });
-            notify('預約' + statusLabel[status] + '。');
+            notify(status === 'accepted' ? '預約已確認。' : '已標記為無法配合。');
           }));
         }
         article.append(actions);
