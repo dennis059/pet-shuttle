@@ -4,7 +4,7 @@ const $ = id => document.getElementById(id);
 const notify = message => { $('message').textContent = message; };
 const money = value => 'NT$' + value.toLocaleString('zh-TW');
 const slotLabel = { am: '早上', pm: '晚上' };
-const statusLabel = { pending: '待司機確認', accepted: '已確認', rejected: '已拒絕', cancelled: '已取消' };
+const statusLabel = { pending: '待司機確認', accepted: '已確認', rejected: '已拒絕' };
 const dayLabel = new Intl.DateTimeFormat('zh-TW', { weekday: 'short', month: 'numeric', day: 'numeric', timeZone: 'UTC' });
 let auth, db, api, role, editing;
 let bookings = new Map();
@@ -74,7 +74,7 @@ function renderBookings() {
     return;
   }
   if (role === 'driver') {
-    const rows = [...bookings.entries()].filter(([, row]) => row.date >= today())
+    const rows = [...bookings.entries()].filter(([, row]) => row.date >= today() && row.status !== 'cancelled')
       .sort(([a], [b]) => a.localeCompare(b));
     if (!rows.length) host.textContent = '目前沒有接下來的接送預約。';
     for (const [id, row] of rows) {
@@ -126,12 +126,15 @@ function renderBookings() {
       pick.checked = !!row && row.status !== 'cancelled';
       const pickLabel = element('label', slotLabel[slot]);
       pickLabel.prepend(pick);
+      const status = element('small', statusLabel[row?.status]);
+      status.hidden = !pick.checked;
       pick.onchange = () => {
         weekDirty = true;
+        status.hidden = !pick.checked;
         car.disabled = !dayFields.some(field => field.pick.checked);
         if (car.disabled) car.checked = false;
       };
-      ride.append(pickLabel, element('small', statusLabel[row?.status]));
+      ride.append(pickLabel, status);
       grid.append(ride);
       dayFields.push({ id, date, slot, row, pick, car });
     }
