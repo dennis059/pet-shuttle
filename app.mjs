@@ -7,6 +7,7 @@ const slotLabel = { am: '早上', pm: '晚上' };
 const statusLabel = { pending: '待司機確認', accepted: '已確認', rejected: '無法配合' };
 const dayLabel = new Intl.DateTimeFormat('zh-TW', { weekday: 'short', month: 'numeric', day: 'numeric', timeZone: 'UTC' });
 const weekdayLabel = new Intl.DateTimeFormat('zh-TW', { weekday: 'short', timeZone: 'UTC' });
+const dateWithWeekday = date => date + '（' + weekdayLabel.format(new Date(date + 'T00:00:00Z')) + '）';
 let auth, db, api, role, editing;
 let bookings = new Map();
 let records = [];
@@ -80,7 +81,7 @@ function renderBookings() {
     if (!rows.length) host.textContent = '目前沒有接下來的接送預約。';
     for (const [id, row] of rows) {
       const article = element('article');
-      article.append(element('strong', row.date + ' · ' + slotLabel[row.slot]),
+      article.append(element('strong', dateWithWeekday(row.date) + ' · ' + slotLabel[row.slot]),
         element('p', (row.car ? '須開車' : '機車') + ' · ' + statusLabel[row.status]));
       if (row.status === 'pending') {
         const actions = element('div', '', 'actions');
@@ -231,8 +232,7 @@ function renderRecords() {
   if (!rows.length) list.textContent = recordsReady ? '這個月還沒有接送紀錄。' : '正在載入紀錄…';
   for (const row of rows) {
     const article = element('article');
-    const weekday = weekdayLabel.format(new Date(row.date + 'T00:00:00Z'));
-    article.append(element('strong', [row.date + '（' + weekday + '）', row.time, row.period].join(' · ')),
+    article.append(element('strong', [dateWithWeekday(row.date), row.time, row.period].join(' · ')),
       element('p', money(row.fee) + (row.note ? '\n' + row.note : '')));
     if (role === 'driver') {
       const actions = element('div', '', 'actions');
